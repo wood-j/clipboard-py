@@ -1,0 +1,4 @@
+websocket-client
+websocket-server
+clipboard
+pyperclip
