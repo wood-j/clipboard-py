@@ -13,7 +13,7 @@ class ClipServer(SocketServerCallback):
         conf = Config.load()
         setting = conf.server_setting
         while True:
-            self.server = SocketServer(port=setting.port, callback=self)
+            self.server = SocketServer(host=setting.host, port=setting.port, callback=self)
             self.server.run()
 
     # ===================================================================== SocketServerCallback

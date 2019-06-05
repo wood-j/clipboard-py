@@ -20,13 +20,14 @@ class SocketServerCallback:
 
 
 class SocketServer(object):
-    def __init__(self, port: int=10000, callback: SocketServerCallback=None):
+    def __init__(self, host: str='0.0.0.0', port: int=10000, callback: SocketServerCallback=None):
         self.port = port
+        self.host = host
         self.callback = callback
         self.server = None  # type: WebsocketServer
 
     def run(self):
-        self.server = WebsocketServer(self.port)
+        self.server = WebsocketServer(self.port, host=self.host)
         self.server.set_fn_new_client(self.new_client)
         self.server.set_fn_client_left(self.client_left)
         self.server.set_fn_message_received(self.message_received)
