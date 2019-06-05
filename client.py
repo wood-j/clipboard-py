@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import time
 import clipboard
@@ -8,7 +9,6 @@ from common.decorators.try_except import try_except
 from common.log import logger
 from common.web_socket_client import SocketClientCallback, SocketClient
 from config import Config
-from PyQt5 import QtWidgets
 
 MSG_SHARE = 0
 
@@ -31,12 +31,12 @@ class ClipClient(SocketClientCallback):
         @try_except('do check')
         def do_check():
             txt = clipboard.paste()
+            if not txt:
+                return
             if self._content == txt:
                 return
+            logger.debug(f'new clipboard content: {txt}')
             self._content = txt
-            logger.debug(f'new clipboard content: {self._content}')
-            if not self._content:
-                return
             if not self.client:
                 return
             dic = {
@@ -81,15 +81,10 @@ class ClipClient(SocketClientCallback):
 
 
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-
-    # @thread_function()
-    # def check():
-    #     while True:
-    #         txt = clipboard.paste()
-    #         logger.debug(txt)
-    #         time.sleep(1)
-    # check()
-    # check()
+    if os.name in ('posix',):
+        try:
+            from PyQt5 import QtWidgets
+        except:
+            raise Exception(f'"pyqt5" not installed, which is required in linux system')
     client = ClipClient()
     client.run()
