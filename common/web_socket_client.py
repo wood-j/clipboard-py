@@ -45,10 +45,10 @@ class SocketClient(object):
 
     @try_except('on open')
     def on_open(self, ws: WebSocketApp):
-        logger.debug(f'web socket connected')
-        # logger.debug(f'send request: hello')
-        # self.send_message('hello')
-        pass
+        if not self.callback:
+            logger.debug(f'web socket connected')
+            return
+        self.callback.on_open(ws)
 
     @try_except('on message')
     def on_message(self, ws: WebSocketApp, message):
