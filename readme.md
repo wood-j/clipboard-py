@@ -1,6 +1,6 @@
 # Introduction
 
-This is an client&server for sharing clipboard between different computers which running client.
+This is a client&server for sharing clipboard between different computers which running client.
 
 Base on `Python3` and `WebSocket`.
 

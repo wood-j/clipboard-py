@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 import sys
@@ -70,6 +71,7 @@ class ClipClient(SocketClientCallback):
             if self._content == content:
                 return
             clipboard.copy(content)
+            logger.debug(f'set clipboard: {content}')
             self._content = content
 
     def on_error(self, ws: WebSocketApp, error):
@@ -80,11 +82,27 @@ class ClipClient(SocketClientCallback):
         self.client = None
 
 
-if __name__ == '__main__':
-    if os.name in ('posix',):
-        try:
-            from PyQt5 import QtWidgets
-        except:
-            raise Exception(f'"pyqt5" not installed, which is required in linux system')
+def run_linux():
+    @thread_function()
+    def run_client_thread():
+        run_client()
+
+    try:
+        from PyQt5 import QtWidgets
+    except:
+        raise Exception(f'"pyqt5" not installed, which is required in linux system')
+    run_client_thread()
+    app = QtWidgets.QApplication(sys.argv)
+    app.exec()
+
+
+def run_client():
     client = ClipClient()
     client.run()
+
+
+if __name__ == '__main__':
+    if os.name in ('posix',):
+        run_linux()
+    else:
+        run_client()
