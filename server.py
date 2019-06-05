@@ -19,7 +19,7 @@ class ClipServer(SocketServerCallback):
     # ===================================================================== SocketServerCallback
 
     def new_client(self, client, server):
-        logger.debug('new client: {client}')
+        logger.debug(f'new client: {client}')
         id = client['id']
         handler = client['handler']
         self.dic_clients[id] = handler
@@ -30,6 +30,8 @@ class ClipServer(SocketServerCallback):
         del self.dic_clients[id]
 
     def message_received(self, client, server, message):
+        b_data = message.encode(encoding='raw_unicode_escape')
+        message = b_data.decode()
         logger.debug(f'client id: {client["id"]} request: {message}')
         client_id = client['id']
         for id, handler in self.dic_clients.items():
