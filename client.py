@@ -17,6 +17,7 @@ MSG_SHARE = 0
 class ClipClient(SocketClientCallback):
     def __init__(self):
         self.client = None  # type: SocketClient
+        self.connected = False
         self._content = ''
 
     def run(self):
@@ -38,7 +39,7 @@ class ClipClient(SocketClientCallback):
                 return
             logger.debug(f'new clipboard content: {txt}')
             self._content = txt
-            if not self.client:
+            if not (self.client and self.connected):
                 return
             dic = {
                 'method': MSG_SHARE,
@@ -56,6 +57,7 @@ class ClipClient(SocketClientCallback):
 
     def on_open(self, ws: WebSocketApp):
         logger.debug(f'web socket connected')
+        self.connected = True
 
     def on_message(self, ws: WebSocketApp, message):
         logger.debug(f'got response: {message}')
@@ -80,6 +82,7 @@ class ClipClient(SocketClientCallback):
     def on_close(self, ws: WebSocketApp):
         logger.debug(f'web socket closed')
         self.client = None
+        self.connected = False
 
 
 def run_linux():
