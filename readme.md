@@ -14,10 +14,24 @@ Run command in Python3 enviroment at source root:
 pip3 install -r requirements.txt
 ```
 
-For linux system (`client only`), install external requirements:
+For linux system (`client side`), install external requirements:
+
+Ubuntu:
 
 ```
-pip3 install -r requirements.linux.txt
+apt install xclip
+```
+
+Centos:
+
+```
+yum install xclip
+```
+
+Arch:
+
+```
+pacman -S xclip
 ```
 
 # Config

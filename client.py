@@ -1,11 +1,8 @@
-import asyncio
 import json
-import os
-import sys
 import time
 import clipboard
 from websocket import WebSocketApp
-from common.decorators.thread_function import thread_function
+from common.decorators.thread_new import thread_new
 from common.decorators.try_except import try_except
 from common.log import logger
 from common.web_socket_client import SocketClientCallback, SocketClient
@@ -18,19 +15,21 @@ class ClipClient(SocketClientCallback):
     def __init__(self):
         self.client = None  # type: SocketClient
         self.connected = False
+        self.end = False
         self._content = ''
 
+    @try_except('client run')
     def run(self):
-        self.check_clipboard_async()
+        self.check_clipboard_thread()
         conf = Config.load()
         setting = conf.server_setting
-        while True:
-            self.client = SocketClient(host=setting.host, port=setting.port, callback=self)
-            self.client.run()
+        self.client = SocketClient(host=setting.host, port=setting.port, callback=self)
+        self.client.run()
+        self.end = True
 
-    @thread_function()
-    def check_clipboard_async(self):
-        @try_except('do check')
+    @thread_new('check_clipboard_thread')
+    def check_clipboard_thread(self):
+        @try_except('do_check')
         def do_check():
             txt = clipboard.paste()
             if not txt:
@@ -49,9 +48,11 @@ class ClipClient(SocketClientCallback):
             logger.debug(f'send: {js}')
             self.client.send_message(js)
 
-        while True:
-            do_check()
+        while 1:
+            if self.end:
+                return
             time.sleep(1)
+            do_check()
 
     # =================================================================== SocketClientCallback
 
@@ -85,27 +86,13 @@ class ClipClient(SocketClientCallback):
         self.connected = False
 
 
-def run_linux():
-    @thread_function()
-    def run_client_thread():
-        run_client()
-
-    try:
-        from PyQt5 import QtWidgets
-    except:
-        raise Exception(f'"pyqt5" not installed, which is required in linux system')
-    run_client_thread()
-    app = QtWidgets.QApplication(sys.argv)
-    app.exec()
-
-
 def run_client():
-    client = ClipClient()
-    client.run()
+    while 1:
+        time.sleep(1)
+        client = ClipClient()
+        client.run()
+        logger.debug('end')
 
 
 if __name__ == '__main__':
-    if os.name in ('posix',):
-        run_linux()
-    else:
-        run_client()
+    run_client()

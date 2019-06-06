@@ -4,31 +4,25 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 class PoolManager:
-    pool = ThreadPoolExecutor(4)
-
-    def set_pool(self, thread_count: int):
-        self.pool = ThreadPoolExecutor(thread_count)
+    pool = ThreadPoolExecutor(10)
 
 
-def thread_function():
+def thread_pool():
     def decorator(func):
         @functools.wraps(func)
-        def wrapper(*args, **kw):
+        def wrapper(*args, **kwargs):
             pool = PoolManager.pool
-            pool.submit(func, *args, **kw)
+            pool.submit(func, *args, **kwargs)
         return wrapper
     return decorator
 
 
 if __name__ == '__main__':
-    @thread_function()
+    @thread_pool()
     def func(key):
         print(f'start: {key}')
         time.sleep(1)
         print(f'end: {key}')
 
-    func('1')
-    func('2')
-    func('3')
-    func('4')
-    func('5')
+    for i in range(20):
+        func(i)

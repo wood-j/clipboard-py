@@ -1,4 +1,8 @@
+import time
+
 from websocket_server import WebSocketHandler
+
+from common.decorators.try_except import try_except
 from common.log import logger
 from common.web_socket_server import SocketServerCallback, SocketServer
 from config import Config
@@ -9,12 +13,12 @@ class ClipServer(SocketServerCallback):
         self.server = None      # type: SocketServer
         self.dic_clients = {}   # type: dict[str, WebSocketHandler]
 
+    @try_except('server run')
     def run(self):
         conf = Config.load()
         setting = conf.server_setting
-        while True:
-            self.server = SocketServer(host=setting.host, port=setting.port, callback=self)
-            self.server.run()
+        self.server = SocketServer(host=setting.host, port=setting.port, callback=self)
+        self.server.run()
 
     # ===================================================================== SocketServerCallback
 
@@ -41,5 +45,7 @@ class ClipServer(SocketServerCallback):
 
 
 if __name__ == '__main__':
-    svc = ClipServer()
-    svc.run()
+    while 1:
+        svc = ClipServer()
+        svc.run()
+        time.sleep(1)
