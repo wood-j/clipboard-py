@@ -29,12 +29,17 @@ class ClipClient(SocketClientCallback):
 
     @thread_new('check_clipboard_thread')
     def check_clipboard_thread(self):
+        def str_equal(str1: str, str2: str):
+            str1 = str1.replace('\r', '')
+            str2 = str2.replace('\r', '')
+            return str1 == str2
+
         @try_except('do_check')
         def do_check():
             txt = clipboard.paste()
             if not txt:
                 return
-            if self._content == txt:
+            if str_equal(self._content, txt):
                 return
             logger.debug(f'new clipboard content: {txt}')
             self._content = txt
