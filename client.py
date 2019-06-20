@@ -8,7 +8,8 @@ from common.log import logger
 from common.web_socket_client import SocketClientCallback, SocketClient
 from config import Config
 
-MSG_SHARE = 0
+MSG_HEAR_BEAT = 'MSG_HEAR_BEAT'
+MSG_SHARE = 'MSG_SHARE'
 
 
 class ClipClient(SocketClientCallback):
@@ -53,10 +54,27 @@ class ClipClient(SocketClientCallback):
             logger.debug(f'send: {js}')
             self.client.send_message(js)
 
+        def send_heat_beat():
+            if not (self.client and self.connected):
+                return
+            dic = {
+                'method': MSG_HEAR_BEAT,
+                'content': '',
+            }
+            js = json.dumps(dic, ensure_ascii=False, indent=4)
+            logger.debug(f'heart beat')
+            self.client.send_message(js)
+
+        loop = 0
         while 1:
             if self.end:
                 return
             time.sleep(1)
+            # heat beat
+            loop = (loop + 1) % 5
+            if loop == 0:
+                send_heat_beat()
+            # check clipboard
             do_check()
 
     # =================================================================== SocketClientCallback

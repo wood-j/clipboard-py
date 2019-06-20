@@ -1,7 +1,9 @@
+import json
 import time
 
 from websocket_server import WebSocketHandler
 
+from client import MSG_HEAR_BEAT
 from common.decorators.try_except import try_except
 from common.log import logger
 from common.web_socket_server import SocketServerCallback, SocketServer
@@ -38,6 +40,10 @@ class ClipServer(SocketServerCallback):
         message = b_data.decode()
         logger.debug(f'client id: {client["id"]} request: {message}')
         client_id = client['id']
+        dic = json.loads(message)
+        msg_type = dic['method']
+        if msg_type == MSG_HEAR_BEAT:
+            return
         for id, handler in self.dic_clients.items():
             if id == client_id:
                 continue
